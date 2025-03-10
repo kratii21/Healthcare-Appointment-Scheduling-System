@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="card mx-auto" style="max-width: 800px;">
+            <div class="card-header bg-primary text-white text-center">
+                <h1 class="card-title"><i class="bi bi-speedometer2"></i> Dashboard</h1>
+            </div>
+            <div class="card-body">
+                <nav class="d-flex justify-content-end mb-4">
+                    <a href="/logout" class="btn btn-danger">
+                        <i class="bi bi-box-arrow-left"></i> Logout
+                    </a>
+                </nav>
+                <h2 class="text-center mb-4"><i class="bi bi-calendar-check"></i> Your Appointments</h2>
+                <ul class="list-group">
+                    {% for appointment in appointments %}
+                    <li class="list-group-item">
+                        <i class="bi bi-calendar-event"></i> Date: {{ appointment['date'] }}, 
+                        <i class="bi bi-clock"></i> Time: {{ appointment['time'] }}, 
+                        <i class="bi bi-info-circle"></i> Status: {{ appointment['status'] }}
+                        <!-- Show approval status -->
+                        {% if appointment['is_approved'] is none %}
+                            <span class="badge bg-warning">Pending Approval</span>
+                        {% elif appointment['is_approved'] %}
+                            <span class="badge bg-success">Approved</span>
+                        {% else %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% endif %}
+                
+                        <!-- Add buttons for doctors to approve or reject appointments -->
+                        {% if user_type == 'doctor' and appointment['is_approved'] is none %}
+                            <form action="{{ url_for('approve_appointment', appointment_id=appointment['id']) }}" method="POST" style="display: inline;">
+                                <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">
+                                    <i class="bi bi-check-circle"></i> Approve
+                                </button>
+                                <button type="submit" name="action" value="reject" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-x-circle"></i> Reject
+                                </button>
+                            </form>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>>
+                <div class="text-center mt-4">
+                    {% if user_type == 'patient' %}
+                    <a href="/schedule" class="btn btn-success">
+                        <i class="bi bi-calendar-plus"></i> Schedule New Appointment
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('update_profile', user_type=user_type, user_id=session['user_id']) }}" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i> Update Profile
+                    </a>
+                    <a href="{{ url_for('delete_profile', user_type=user_type, user_id=session['user_id']) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete your profile?');">
+                        <i class="bi bi-trash"></i> Delete Profile
+                    </a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
